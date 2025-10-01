@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import SearchCountry from './SearchCountry.vue';
 
     const API_URL = "https://restcountries.com/"
     const catalog = ref([])
@@ -7,14 +8,14 @@ import { computed, onMounted, ref } from 'vue';
     let isLoading = ref(false);
     const currentPage = ref(1)
     const perPage = ref (25)
+    const filteredCatalog = ref([])
 
-    // paginate 
 
     const calculatedPage = computed(() => {
-        if(!catalog.value || catalog.value.length === 0){
+        if(!filteredCatalog.value || filteredCatalog.value.length === 0){
             return 0
         }
-        return Math.ceil(catalog.value.length / perPage.value)
+        return Math.ceil(filteredCatalog.value.length / perPage.value)
     })
 
     const startIndex = computed (() => {
@@ -25,10 +26,10 @@ import { computed, onMounted, ref } from 'vue';
     })
 
     const paginatedCatalog = computed(() => {
-        if(!catalog.value || catalog.value.length === 0) {
+        if(!filteredCatalog.value || filteredCatalog.value.length === 0) {
             return [];
         }
-        return catalog.value.slice(startIndex.value,endIndex.value)
+        return filteredCatalog.value.slice(startIndex.value,endIndex.value)
     })
     const nextPage = ()=> {
         if(currentPage.value <= calculatedPage.value){
@@ -57,6 +58,7 @@ import { computed, onMounted, ref } from 'vue';
             isLoading.value = false
             if(res.status === 200) {
                 catalog.value = await res.json()
+                filteredCatalog.value = catalog.value
             }
         }catch(error) {
             message.value = error.message;
@@ -64,9 +66,11 @@ import { computed, onMounted, ref } from 'vue';
         }finally {
             isLoading.value = false
         }
-        
     } 
-
+        const handleSearch = (result) => {
+            filteredCatalog.value =  result
+            currentPage.value = 1
+        }
     const getNativeLanguage = (country) => {
         if(!country.name.nativeName){
             return country.name.official
@@ -82,11 +86,7 @@ import { computed, onMounted, ref } from 'vue';
     return country.altSpellings[0]
     }
     onMounted(catalogInfor)
-     const name = {
-            name: null
-     }
 
-     
 
 </script>
 <template >
@@ -94,7 +94,12 @@ import { computed, onMounted, ref } from 'vue';
         <div class="mt-30 mb-20">
             <h1 class="text-6xl text-center font-bold text-blue-500"> Countries Catalogs</h1>
         </div>
-
+        <div>
+            <SearchCountry 
+            @search="handleSearch"
+            :catalog="catalog"
+            />
+        </div>
         <div class="flex justify-center items-center">
                 <div class="w-410 flex items-center justify-start mb-5">
                     <button
