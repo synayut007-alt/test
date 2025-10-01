@@ -1,5 +1,6 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, isMemoSame, onMounted, ref } from 'vue';
+import CountryModal from './CountryModal.vue';
 import SearchCountry from './SearchCountry.vue';
 
     const API_URL = "https://restcountries.com/"
@@ -9,7 +10,20 @@ import SearchCountry from './SearchCountry.vue';
     const currentPage = ref(1)
     const perPage = ref (25)
     const filteredCatalog = ref([])
+    const isOpenModal = ref(false)
+    const selectModal = ref(null)
 
+    const getModal = (country) => {
+        selectModal.value = country;
+        isOpenModal.value = true
+        document.body.style.overflow = 'hidden';
+    }
+
+    const closeModal = () => {
+        isOpenModal.value = false
+        selectModal.value = null
+        document.body.style.overflow = 'auto';
+    }
 
     const calculatedPage = computed(() => {
         if(!filteredCatalog.value || filteredCatalog.value.length === 0){
@@ -133,7 +147,7 @@ import SearchCountry from './SearchCountry.vue';
             </div>
             <div v-else class= "flex overflow-hidden w-450 flex-wrap justify-center"> 
                 <div v-for="countryInfor in paginatedCatalog" :key="countryInfor.name.common" class="">
-                    <div class="w-80 p-2 mb-20 h-100 border-1 flex flex-col items-center m-1" >
+                    <div class="w-80 p-2 mb-20 h-100 border-1 flex flex-col items-center m-1" @click="getModal(countryInfor)">
                         <div class="w-70 h-40 overflow-hidden">
                             <img class="w-70" :src="countryInfor.flags.png">
                         </div>
@@ -148,6 +162,15 @@ import SearchCountry from './SearchCountry.vue';
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div v-if="isOpenModal" class="fixed inset-0 z-50 flex items-center justify-center p-2">
+        <CountryModal
+            :country="selectModal"
+            :isOpen="isOpenModal"
+            @close="closeModal"
+            class="w-full max-w-xl border-1 bg-white p-6 shadow-2xl"
+        />
         </div>
     </div>
 </template>
