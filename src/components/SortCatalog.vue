@@ -15,7 +15,7 @@ const emit = defineEmits(['sort'])
 const handleSort = () => {
     if(sortOrder.value === "") {
         emit('sort', props.catatog)
-        return
+        return []
     }
     
     const sorted = [...props.catalog].sort((a, b) => {
