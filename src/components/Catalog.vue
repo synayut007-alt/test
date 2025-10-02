@@ -2,7 +2,7 @@
 import { computed, isMemoSame, onMounted, ref } from 'vue';
 import CountryModal from './CountryModal.vue';
 import SearchCountry from './SearchCountry.vue';
-
+import SortCatalog from './SortCatalog.vue';
     const API_URL = "https://restcountries.com/"
     const catalog = ref([])
     const message = ref(null)
@@ -101,6 +101,10 @@ import SearchCountry from './SearchCountry.vue';
     }
     onMounted(catalogInfor)
 
+    const handleSort = (data) => {
+        filteredCatalog.value = data
+        currentPage.value = 1
+    }
 
 </script>
 <template >
@@ -112,7 +116,7 @@ import SearchCountry from './SearchCountry.vue';
             <SearchCountry 
             @search="handleSearch"
             :catalog="catalog"
-            />
+            /> 
         </div>
         <div class="flex justify-center items-center">
                 <div class="w-410 flex items-center justify-start mb-5">
@@ -134,7 +138,13 @@ import SearchCountry from './SearchCountry.vue';
                     class=" p-3 border-1 ml-5"
                     >
                         Next
-                    </button>                    
+                    </button>  
+                    <div class="ml-5"> 
+                            <SortCatalog 
+                                :catalog="filteredCatalog" 
+                                @sort="handleSort"
+                            />
+                        </div>                 
                 </div>
         </div>       
         <div class="flex items-center justify-center ">
