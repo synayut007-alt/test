@@ -104,6 +104,7 @@ import SortCatalog from './SortCatalog.vue';
     const handleSort = (data) => {
         filteredCatalog.value = data
         currentPage.value = 1
+        openSort.value = true
     }
 
 </script>
@@ -140,7 +141,7 @@ import SortCatalog from './SortCatalog.vue';
                         Next
                     </button>  
                     <div class="ml-5"> 
-                            <SortCatalog 
+                            <SortCatalog
                                 :catalog="filteredCatalog" 
                                 @sort="handleSort"
                             />

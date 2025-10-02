@@ -12,12 +12,13 @@ const sortOrder = ref('');
 
 const emit = defineEmits(['sort'])
 
-const handleSort = () => {
     if(sortOrder.value === "") {
         emit('sort', props.catalog)
         return []
     }
     
+
+const handleSort = () => {
     const sorted = [...props.catalog].sort((a, b) => {
         const aValue = a.name.common // Adjust this to your actual property path
         const bValue = b.name.common // e.g., a.name, a.title, etc.
@@ -42,7 +43,7 @@ const handleSort = () => {
             v-model="sortOrder"
             @change="handleSort"
         >
-            <option value="default">-- Select --</option>
+            <option value="">-- Select --</option>
             <option value="asc">A-Z</option>
             <option value="desc">Z-A</option>
         </select>
