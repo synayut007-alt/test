@@ -42,7 +42,7 @@ const handleSort = () => {
             v-model="sortOrder"
             @change="handleSort"
         >
-            <option value="">-- Select --</option>
+            <option value="default">-- Select --</option>
             <option value="asc">A-Z</option>
             <option value="desc">Z-A</option>
         </select>
