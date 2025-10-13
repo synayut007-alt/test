@@ -1,19 +1,21 @@
-<script setup>
-import { computed, isMemoSame, onMounted, ref } from 'vue';
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
 import CountryModal from './CountryModal.vue';
 import SearchCountry from './SearchCountry.vue';
 import SortCatalog from './SortCatalog.vue';
-    const API_URL = "https://restcountries.com/"
-    const catalog = ref([])
-    const message = ref(null)
-    let isLoading = ref(false);
-    const currentPage = ref(1)
-    const perPage = ref (25)
-    const filteredCatalog = ref([])
-    const isOpenModal = ref(false)
-    const selectModal = ref(null)
+import type { Country } from '../types/data';
 
-    const getModal = (country) => {
+    const API_URL = "https://restcountries.com/"
+    const catalog = ref <Country[]>([])
+    const message = ref<string | null>()
+    let isLoading = ref <boolean> ( false);
+    const currentPage = ref <number>(1)
+    const perPage = ref <number> (25)
+    const filteredCatalog = ref <Country []>([])
+    const isOpenModal = ref<boolean>(false)
+    const selectModal = ref<Country | null>(null)
+
+    const getModal = (country: Country) => {
         selectModal.value = country;
         isOpenModal.value = true
         document.body.style.overflow = 'hidden';
@@ -25,42 +27,42 @@ import SortCatalog from './SortCatalog.vue';
         document.body.style.overflow = 'auto';
     }
 
-    const calculatedPage = computed(() => {
+    const calculatedPage = computed(():number => {
         if(!filteredCatalog.value || filteredCatalog.value.length === 0){
             return 0
         }
         return Math.ceil(filteredCatalog.value.length / perPage.value)
     })
 
-    const startIndex = computed (() => {
+    const startIndex = computed (():number => {
         return (currentPage.value -1) * perPage.value
     })
-    const endIndex = computed (() => {
+    const endIndex = computed (():number => {
         return (startIndex.value) + perPage.value
     })
 
-    const paginatedCatalog = computed(() => {
+    const paginatedCatalog = computed(():Country[] => {
         if(!filteredCatalog.value || filteredCatalog.value.length === 0) {
             return [];
         }
         return filteredCatalog.value.slice(startIndex.value,endIndex.value)
     })
-    const nextPage = ()=> {
+    const nextPage = (): void=> {
         if(currentPage.value <= calculatedPage.value){
             currentPage.value ++ 
             window.scrollTo({top: 0 , behavior: 'smooth'})
         }
     }
-    const prevPage = ()=> {
+    const prevPage = (): void=> {
         if(currentPage.value >= 1 ){
             currentPage.value -- 
             window.scrollTo({top: 0 , behavior: 'smooth'})
         }
     }    
-    const isPrevDisable = computed(() => {
+    const isPrevDisable = computed(():boolean => {
         return currentPage.value ===1
     })
-    const isNextDisable = computed(() => {
+    const isNextDisable = computed(():boolean  => {
         return currentPage.value === calculatedPage.value
     })
     
@@ -68,9 +70,9 @@ import SortCatalog from './SortCatalog.vue';
         try{
             isLoading.value = true
             const res = await fetch (`${API_URL}v3.1/independent?status=true`)
-            console.log(isLoading)
+            console.log(isLoading.value)
             isLoading.value = false
-            if(res.status === 200) {
+            if(res.status === 200) {    
                 catalog.value = await res.json()
                 filteredCatalog.value = catalog.value
             }
@@ -81,18 +83,18 @@ import SortCatalog from './SortCatalog.vue';
             isLoading.value = false
         }
     } 
-        const handleSearch = (result) => {
+        const handleSearch = (result : Country[]) => {
             filteredCatalog.value =  result
             currentPage.value = 1
         }
-    const getNativeLanguage = (country) => {
+    const getNativeLanguage = (country:Country) => {
         if(!country.name.nativeName){
             return country.name.official
         }
         const firstNativeLanguage = Object.keys(country.name.nativeName)[0];
         return country.name.nativeName[firstNativeLanguage].official;
     }
-    const getAllAlterSpells = (country) => {
+    const getAllAlterSpells = (country:Country) => {
     if(!country.altSpellings || country.altSpellings.length === 0){
         return ""
     }
@@ -102,9 +104,16 @@ import SortCatalog from './SortCatalog.vue';
     onMounted(catalogInfor)
 
     const handleSort = (data) => {
+  if (data === 'RESET_SORT') {
+        // When the 'RESET_SORT' signal is received, revert to the original data 
+        // fetched from the API (catalog.value)
+        filteredCatalog.value = catalog.value
+    } else {
+        // For A-Z or Z-A sort, or a search result, use the data that was passed
         filteredCatalog.value = data
-        currentPage.value = 1
-        openSort.value = true
+    }
+    
+    currentPage.value = 1
     }
 
 </script>
@@ -142,7 +151,7 @@ import SortCatalog from './SortCatalog.vue';
                     </button>  
                     <div class="ml-5"> 
                             <SortCatalog
-                                :catalog="filteredCatalog" 
+                                :countries="filteredCatalog" 
                                 @sort="handleSort"
                             />
                         </div>                 
@@ -151,7 +160,7 @@ import SortCatalog from './SortCatalog.vue';
         <div class="flex items-center justify-center ">
             
             <div v-if="isLoading">
-               <h1 class="text-3xl">Loading</h1>
+               <h1 class="text-3xl">Loading...</h1>
                 <div v-if="message">
                     <p>{{ message }}</p>
                 </div>            
